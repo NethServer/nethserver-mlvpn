@@ -93,10 +93,12 @@ case "$STATUS" in
         for r in $IP6_ROUTES; do
             route_add 6 $r
         done
+        shorewall restart &> /dev/null
     ;;
     "tuntap_down")
         log "$DEVICE down"
         link_down
+        shorewall restart &> /dev/null
     ;;
     "rtun_up")
         log "tunnel [$3] is up"
@@ -106,6 +108,5 @@ case "$STATUS" in
         ;;
 esac
 
-shorewall restart &> /dev/null
 
 exit 0
