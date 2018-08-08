@@ -31,16 +31,6 @@ my $event = "nethserver-mlvpn-update";
 
 event_actions($event, 'initialize-default-databases' => '00');
 
-
-#--------------------------------------------------
-# actions for mlvpn-create
-#--------------------------------------------------
-
-$event = "mlvpn-create";
-
-event_actions($event, 'nethserver-mlvpn-genconfig' => '20');
-event_actions($event, 'firewall-adjust' => '70');
-
 #--------------------------------------------------
 # actions for mlvpn-modify
 #--------------------------------------------------
