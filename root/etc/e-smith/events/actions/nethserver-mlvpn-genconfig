@@ -1,0 +1,107 @@
+#!/usr/bin/perl
+
+#
+# Copyright (C) 2018 Nethesis S.r.l.
+# http://www.nethesis.it - nethserver@nethesis.it
+#
+# This script is part of NethServer.
+#
+# NethServer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License,
+# or any later version.
+#
+# NethServer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with NethServer.  If not, see COPYING.
+#
+
+#
+# Genereate configuration and manage systemd units
+# for mlvpn.
+#
+
+use esmith::templates;
+use esmith::ConfigDB;
+use File::Glob ':glob';
+
+my $event = shift or die("Missing event name");
+my $name = shift or die("Missing vpn name argument");
+our $db = esmith::ConfigDB->open_ro('mlvpn') || die("Can't open mlvpn db");
+
+sub enable
+{
+    my $name = shift;
+    my $instance = 'mlvpn@'.$name;
+    system("/usr/bin/systemctl enable $instance");
+    system("/usr/bin/systemctl restart $instance");
+}
+
+sub disable
+{
+    my $name = shift;
+    my $instance = 'mlvpn@'.$name;
+    system("/usr/bin/systemctl stop $instance");
+    system("/usr/bin/systemctl disable $instance");
+}
+
+sub toggle
+{
+    my $name = shift;
+    my $status = shift;
+    my $instance = 'mlvpn@'.$name;
+    
+    if ($status eq 'enabled') {
+        enable($name, $systemd_name);
+    } else {
+        disable($name, $systemd_name);
+    }
+}
+
+sub gen_config
+{
+    my $name = shift;
+    my $record = $db->get($name) || die("Can't find '$name' inside vpn db");
+    my $type = $record->prop('type');
+    my $status;
+
+    esmith::templates::processTemplate({
+        TEMPLATE_PATH => "mlvpn-config",
+        OUTPUT_FILENAME => "/etc/mlvpn/$name.conf",
+        PERMS => 0600,
+        MORE_DATA => { 'record' => $record, 'name' => $name }
+    });
+
+    # Adjust systemd configuration
+    toggle($name,  $record->prop('status'));
+}
+
+# Make sure mlvpn home has the right permissions for socket creation
+system("systemd-tmpfiles --remove --create 2>/dev/null");
+
+my $mask = 0;
+foreach ($db->get_all()) {
+    my $status = $_->prop('status') || 'disabled';
+    if ($status eq 'enabled') {
+        $mask = 1;
+        break;
+    }
+}
+if ($mask) {
+    system("systemctl mask lsm --now");
+} else {
+    system("systemctl unmask lsm --now");
+}
+
+if ($event eq 'mlvpn-delete') {
+    disable($name);
+    # Delete existing tunnel
+    unlink("/etc/mlvpn/$name.conf");
+    unlink("/var/lib/shorewall/mlvpn$name.*");
+} elsif ($event eq 'mlvpn-create' || $event eq 'mlvpn-modify') {
+    gen_config($name, $type);
+}

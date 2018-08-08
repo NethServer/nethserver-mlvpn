@@ -1,0 +1,52 @@
+#
+# 30connections
+#
+
+{
+    use esmith::NetworksDB;
+    my $ndb = esmith::NetworksDB->open_ro() || die("Can't open networks db");
+    my $connections = $record->prop('Connections') || die("No connection given");
+    my $timeout = $record->prop('Timeout') || 30;
+    my $type = $record->prop('type');
+   
+    sub _get_provider_name {
+        my $interface = shift;
+        foreach ($ndb->get_all_by_prop('type' => 'provider')) {
+            if ($_->prop('interface') eq $interface) {
+                return $_->key;
+            }
+        }
+        return $interface;
+    }
+
+    sub _get_ipaddr {
+        my $interface = shift;
+        my $ip = `/sbin/ip -o -4 address show $interface  primary | head -1 | awk '{print \$4}' | cut -d'/' -f 1`;
+        chomp $ip;
+        return $ip;
+    }
+ 
+    foreach (split(',',$connections)) {
+        my ($interface, $host, $port) = split(':', $_);
+
+        if ($type eq 'client') {
+            my $i = $ndb->get($interface) || next;
+            my $upload = $i->prop('FwOutBandwidth') || '';
+            $OUT .= "\n["._get_provider_name($i->key)."]\n";
+            my $ipaddr = $i->prop('ipaddr') || _get_ipaddr($interface) || next;
+            $OUT .= "bindhost = $ipaddr\n";
+            $OUT .= "remotehost = $host\n";
+            $OUT .= "remoteport = $port\n";
+        } else {
+            $OUT .= "\n[$interface]\n";
+            $OUT .= "bindhost = $host\n";
+            $OUT .= "bindport = $port\n";
+        }
+
+        $OUT .= "timeout = $timeout\n";
+        if ( $upload ne '') {
+            $OUT .= "bandwidth_upload = $upload\n";
+        }
+    }
+}
+

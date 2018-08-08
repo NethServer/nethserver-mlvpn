@@ -1,0 +1,32 @@
+#
+# 10general
+#
+
+[general]
+statuscommand = "/etc/mlvpn/mlvpn_updown_shorewall.sh"
+mode = "{{$record->prop('type')}}"
+mtu = 1444
+tuntap = "tun"
+interface_name = "{{"mlvpn" . $record->key}}"
+timeout = {{$record->prop('Timeout')}}
+password = "{{$record->prop("Password")}}"
+control_unix_path = "{{$record->key. ".sock"}}"
+reorder_buffer_size = {{$record->prop('ReorderBuffer')}}
+loss_tolerence = {{$record->prop('LossTolerence')}}
+{
+    my $encryption = $record->prop('Encryption') || 'enabled';
+    if ($encryption eq 'enabled') {
+        $OUT .= "cleartext_data = 0\n";
+    } else {
+        $OUT .= "cleartext_data = 1\n";
+    }
+
+    my $networks = $record->prop('RemoteNetworks') || '';
+    if ($networks ne '') {
+        $networks =~ s/,/ /g;
+        $OUT .= "ip4_routes = \"$networks\"";
+    }
+}
+ip4 = "{{$record->prop('LocalPeer')."/24"}}"
+ip4_gateway = "{{$record->prop('RemotePeer')}}"
+

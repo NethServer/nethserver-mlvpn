@@ -1,0 +1,20 @@
+#
+# 80mlvpn
+#
+
+{
+    use esmith::ConfigDB;
+    use esmith::NetworksDB;
+    my $db = esmith::ConfigDB->open_ro('mlvpn') || die("Can't open mlvpn db");
+    my $ndb = esmith::NetworksDB->open_ro() || die("Can't open networks db");
+    foreach ($db->get_all()) {
+       my $type = $_->prop('type') || '';
+       next if ($type ne 'server');
+       my $nat = $_->prop('Nat') || 'disabled';
+       if ($nat eq 'enabled') {
+           foreach my $g ($ndb->green()) {
+               $OUT .= "MASQUERADE\t-\t".$g->key."\n";
+           }
+       }
+    }
+}

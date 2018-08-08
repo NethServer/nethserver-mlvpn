@@ -1,0 +1,17 @@
+#
+# 80mlvpn
+#
+{
+    use esmith::ConfigDB;
+    my $mdb = esmith::ConfigDB->open_ro('mlvpn');
+    foreach my $server ($mdb->get_all_by_prop('type', 'server')) {
+        my $connections = $server->prop('Connections') || next;
+        foreach my $c (split(',', $connections)) {
+            my ($interface, $host, $port) = split(':', $c);
+            $OUT .= "?COMMENT mlvpn ".$server->key."\n";
+            $OUT .= "ACCEPT\tnet\t\$FW\tudp\t$port \n";
+            $OUT .= "?COMMENT\n";
+        }
+    }
+}
+

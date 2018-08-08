@@ -1,0 +1,18 @@
+#
+# 80mlvpn
+#
+{
+    use esmith::ConfigDB;
+    my $db = esmith::ConfigDB->open_ro('mlvpn') || die("Can't open mlvpn db");
+    foreach my $record ($db->get_all()) {
+       my $type = $record->prop('type') || '';
+       my $status = $record->prop('status') || 'disabled';
+       next if ($status eq 'disabled');
+       my $nat = $record->prop('Nat') || 'disabled';
+       if ($nat eq 'enabled' && $type eq 'client') {
+           $OUT .="net\tmlvpn".$record->key."\toptional\n";
+       } else { 
+           $OUT .="loc\tmlvpn".$record->key."\toptional\n";
+       }
+    }
+}

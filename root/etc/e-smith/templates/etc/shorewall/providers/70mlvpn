@@ -1,0 +1,39 @@
+{
+
+    use esmith::ConfigDB;
+    my $db = esmith::ConfigDB->open_ro('mlvpn') || die("Can't open mlvpn db");
+    foreach my $record ($db->get_all()) {
+       my $type = $record->prop('type') || '';
+       next if ($type ne 'client');
+       my $status = $record->prop('status') || 'disabled';
+       next if ($status eq 'disabled');
+       my $nat = $record->prop('Nat') || 'disabled';
+       if ($nat eq 'enabled') {
+           my @tmp;
+           my %override = (
+               "track" => "",
+               "persistent" => "",
+               "fallback" => 2
+           );
+           foreach my $p (@providers) {
+              $p->{'options'} = \%override;
+              push(@tmp, $p);
+           }
+           my %mlvpn_options = (
+               "persistent" => "",
+               "balance" => 1
+           );
+           my %mlvpn = (
+               "name" => "mlvpn",
+               "number" => "15",
+               "mask" => "0xf0000",
+               "gateway" => $record->prop("RemotePeer"),
+               "interface" => "mlvpn".$record->key,
+               "options" => \%mlvpn_options
+           );
+           push(@tmp,\%mlvpn);
+           @providers = @tmp;
+           last;
+       }
+    }
+}
