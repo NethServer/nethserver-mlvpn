@@ -1,0 +1,8 @@
+#
+# 20policy_mlvpn
+#
+loc            mlvpn          ACCEPT
+mlvpn          loc            ACCEPT
+mlvpn          $FW            ACCEPT
+$FW            mlvpn          ACCEPT
+mlvpn          net            ACCEPT

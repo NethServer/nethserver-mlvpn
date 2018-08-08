@@ -25,13 +25,12 @@ use NethServer::Firewall qw(register_callback);
 use esmith::DB::db;
 use esmith::util;
 
-register_callback(\&mlvpn_tunnels);
-register_callback(\&mlvpn_virtuals);
+register_callback(\&mlvpn_networks);
 
 #
-# Search inside virtual IPs
+# Search inside virtual IPs and remote networks
 #
-sub mlvpn_virtuals
+sub mlvpn_networks
 {
     my $value = shift;
 
@@ -39,32 +38,25 @@ sub mlvpn_virtuals
     foreach ($db->get_all()) {
         my $type = $_->prop('type') || 'client';
         next if ($type ne 'server');
+        my $nat = $_->prop('Nat') || 'disabled';
+        my $nets = $_->prop('RemoteNetworks') || '';
+        my $zone = 'mlvpn';
+        if ($nat eq 'enabled') {
+            $zone = 'loc';
+        }
+
+        # Search for tunnel IP
         my $local = $_->prop('LocalPeer') || next;
         # mask is hard-coded
         if (Net::IPv4Addr::ipv4_in_network("$local/24", $value)) {
-            return 'loc';
+            return $zone;
         }
-    }
-}
 
-#
-# Search inside tunnel networks
-#
-sub mlvpn_tunnels
-{
-    my $value = shift;
-
-    my $db = esmith::DB::db->open_ro('mlvpn');
-    foreach ($db->get_all()) {
-        my $type = $_->prop('type') || 'client';
-        next if ($type ne 'server');
-        my $nets = $_->prop('RemoteNetworks') || next;
+        # Search inside remote networks
         foreach my $net (split(',',$nets)) {
             if (Net::IPv4Addr::ipv4_in_network($net, $value)) {
-                return 'loc';
+                return $zone;
             }
         }
     }
-
-    return '';
 }

@@ -9,10 +9,10 @@
        my $status = $record->prop('status') || 'disabled';
        next if ($status eq 'disabled');
        my $nat = $record->prop('Nat') || 'disabled';
-       if ($nat eq 'enabled' && $type eq 'client') {
-           $OUT .="net\tmlvpn".$record->key."\toptional\n";
+       if ($nat eq 'enabled' && $type eq 'server') {
+           $OUT .="loc\tmlvpn".$record->key."\n";
        } else { 
-           $OUT .="loc\tmlvpn".$record->key."\toptional\n";
+           $OUT .="mlvpn\tmlvpn".$record->key."\n";
        }
     }
 }
