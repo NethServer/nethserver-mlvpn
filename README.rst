@@ -56,29 +56,40 @@ Tunnel are records inside the ``mlvpn`` esmith database. Each machine can handle
 
 Supported record type:
 
-- ``server``: configure a MLVPN server on a VPS or another remote machine with 1 at least one green interface
-- ``client``: configure a MLVPN client on firewall with at least 2 WAN connections to be bonded together
+* ``server``: configure a MLVPN server on a VPS or another remote machine with 1 at least one green interface
+* ``client``: configure a MLVPN client on firewall with at least 2 WAN connections to be bonded together
 
 Options:
 
-``status``: can be ``enabled`` or ``disabled``, if ``disabled`` the MLVPN instance will not be 
-``Connections``: a comma-separated list of strings in the format ``identifier:address:port``. 
+* ``status``: can be ``enabled`` or ``disabled``, if ``disabled`` the MLVPN instance will not be 
+
+* ``Connections``: a comma-separated list of strings in the format ``identifier:address:port``. 
   The meaning is different when used on a client or server record.
-    - server: ``identifier`` is a unique name of the connection, like "fiber1"; ``address`` is the bind IP, it should always be ``0.0.0.0``; ``port`` is the unique binding port
-    - client: ``identifier`` is the name of an existing red interface, like ``eth2``; ``address`` is the remote server public IP or hostname; ``port`` is the server remote port
-``Encryption``: if ``enabled`` all traffic will be encrypted, if ``disabled`` session data (auth)
+
+  * server: ``identifier`` is a unique name of the connection, like "fiber1"; ``address`` is the bind IP, it should always be ``0.0.0.0``; ``port`` is the unique binding port
+  * client: ``identifier`` is the name of an existing red interface, like ``eth2``; ``address`` is the remote server public IP or hostname; ``port`` is the server remote port
+
+* ``Encryption``: if ``enabled`` all traffic will be encrypted, if ``disabled`` session data (auth)
   will still be encrypted, but all data packets will not
-``LocalPeer``: a local virtual IP for the tunnel, used for firewall rules
-``LossTolerence``: the maximum loss ratio accepted before the link affected is being considered too lossy and removed from aggregation.
+
+* ``LocalPeer``: a local virtual IP for the tunnel, used for firewall rules
+
+* ``LossTolerence``: the maximum loss ratio accepted before the link affected is being considered too lossy and removed from aggregation.
   This value is expressed in percent. A value of ``100`` disables the loss tolerance system
-``Nat``: set it to ``enabled`` if the tunnel should be used for internet access. Inside the the client use the tunnel as default gateway; inside the server, it enabled the masquerading.
+
+* ``Nat``: set it to ``enabled`` if the tunnel should be used for internet access. Inside the the client use the tunnel as default gateway; inside the server, it enabled the masquerading.
   Set to ``disabled`` if the tunnel should be used to access services running on the server (or on a network attached to it)
-``Password``: random password used for encryption
-``RemoteNetworks``: comma-separated list of network CIDR which should be reachable behind the tunnel. All routes are created on tunnel startup
-``RemotePeer``: the IP of the remote tunnel endpoint, used for firewall rules
-``ReorderBuffer``: number of packets inside the buffer for reordering algorithm. Experiment to know what value is best for you. Good starting point can be as small as ``64`` packets
+
+* ``Password``: random password used for encryption
+
+* ``RemoteNetworks``: comma-separated list of network CIDR which should be reachable behind the tunnel. All routes are created on tunnel startup
+
+* ``RemotePeer``: the IP of the remote tunnel endpoint, used for firewall rules
+
+* ``ReorderBuffer``: number of packets inside the buffer for reordering algorithm. Experiment to know what value is best for you. Good starting point can be as small as ``64`` packets
   If set to ``0``, it disables the link aggregation
-``Timeout``: triggered when the other side does not responds to keepalive packets. Keepalive are send every timeout/2 seconds. Good starting point can be ``30`` seconds
+
+* ``Timeout``: triggered when the other side does not responds to keepalive packets. Keepalive are send every timeout/2 seconds. Good starting point can be ``30`` seconds
 
 
 When configuring a client and a server, the following options should be the same on both ends: ``Encryption``, ``LossTolerance``, ``Nat``, ``Password``, ``ReorderBuffer``, ``Timeout``.
