@@ -1,0 +1,6 @@
+/var/log/mlvpn/*.log {
+    missingok
+    notifempty
+    copytruncate
+    create 0600 root root
+}
