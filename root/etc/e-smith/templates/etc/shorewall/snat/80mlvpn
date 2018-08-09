@@ -10,6 +10,9 @@
     foreach ($db->get_all()) {
        my $type = $_->prop('type') || '';
        next if ($type ne 'server');
+       my $status = $_->prop('status') || 'disabled';
+       next if ($status eq 'disabled');
+
        my $nat = $_->prop('Nat') || 'disabled';
        if ($nat eq 'enabled') {
            foreach my $g ($ndb->green()) {

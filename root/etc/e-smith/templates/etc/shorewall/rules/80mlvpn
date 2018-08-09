@@ -5,6 +5,8 @@
     use esmith::ConfigDB;
     my $mdb = esmith::ConfigDB->open_ro('mlvpn');
     foreach my $server ($mdb->get_all_by_prop('type', 'server')) {
+        my $status = $server->prop('status') || 'disabled';
+        next if ($status eq 'disabled');
         my $connections = $server->prop('Connections') || next;
         foreach my $c (split(',', $connections)) {
             my ($interface, $host, $port) = split(':', $c);
