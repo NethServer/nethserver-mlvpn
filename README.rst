@@ -69,6 +69,8 @@ Options:
   * server: ``identifier`` is a unique name of the connection, like "fiber1"; ``address`` is the bind IP, it should always be ``0.0.0.0``; ``port`` is the unique binding port
   * client: ``identifier`` is the name of an existing red interface, like ``eth2``; ``address`` is the remote server public IP or hostname; ``port`` is the server remote port
 
+* ``ControlPort``: HTTP port to use for retrieving tunnel statics. The port is bind only on 127.0.0.1. Use progressive ports starting from ``50001``
+
 * ``Encryption``: if ``enabled`` all traffic will be encrypted, if ``disabled`` session data (auth)
   will still be encrypted, but all data packets will not
 
@@ -140,17 +142,18 @@ Create a tunnel between an office firewall and a VPS to access a service running
 Configure a client named ``c1``: ::
 
   db mlvpn set c1 client status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 50 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
-  RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat disabled
+  RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat disabled ControlPort 50001
   signal-event mlvpn modify c1
 
 
 Configure a server named: ``s1``::
 
   db mlvpn set s1 server status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 50 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
-  RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat disabled
+  RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat disabled ControlPort 50001
   signal-event mlvpn-modify s1
     
 High-speed proxy firewall
+
 -------------------------
 
 Access Internet using the VPS a proxy firewall.
@@ -158,14 +161,14 @@ Access Internet using the VPS a proxy firewall.
 Configure a client named ``c1``: ::
 
   db mlvpn set c1 client status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 100 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
-  RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat enabled
+  RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat enabled ControlPort 50001
   signal-event mlvpn modify c1
 
 
 Configure a server named: ``s1``::
 
   db mlvpn set s1 server status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 100 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
-  RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat enabled
+  RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat enabled ControlPort 50001
   signal-event mlvpn-modify s1
 
 

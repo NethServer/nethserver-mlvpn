@@ -30,6 +30,8 @@ use esmith::Build::CreateLinks  qw(:all);
 my $event = "nethserver-mlvpn-update";
 
 event_actions($event, 'initialize-default-databases' => '00');
+templates2events("/usr/share/mlvpn/tunnels.csv",  $event);
+event_services($event, 'httpd' => 'reload');
 
 #--------------------------------------------------
 # actions for mlvpn-modify
@@ -39,6 +41,7 @@ $event = "mlvpn-modify";
 
 event_actions($event, 'nethserver-mlvpn-genconfig' => '20');
 event_actions($event, 'firewall-adjust' => '70');
+templates2events("/usr/share/mlvpn/tunnels.csv",  $event);
 
 #--------------------------------------------------
 # actions for mlvpn-delete
@@ -48,3 +51,4 @@ $event = "mlvpn-delete";
 
 event_actions($event, 'nethserver-mlvpn-genconfig' => '20');
 event_actions($event, 'firewall-adjust' => '70');
+templates2events("/usr/share/mlvpn/tunnels.csv",  $event);

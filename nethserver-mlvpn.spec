@@ -36,5 +36,6 @@ mkdir -p %{buildroot}/var/log/mlvpn
 %defattr(-,root,root)
 %doc COPYING
 %dir %{_nseventsdir}/%{name}-update
+%config(noreplace) /etc/httpd/conf.d/mlvpn.conf
 
 %changelog

@@ -10,10 +10,16 @@ tuntap = "tun"
 interface_name = "{{"mlvpn" . $record->key}}"
 timeout = {{$record->prop('Timeout')}}
 password = "{{$record->prop("Password")}}"
-control_unix_path = "{{$record->key. ".sock"}}"
 reorder_buffer_size = {{$record->prop('ReorderBuffer')}}
 loss_tolerence = {{$record->prop('LossTolerence')}}
 {
+    my $cport = $record->prop('ControlPort') || '';
+    if ($cport ne '') {
+        $OUT .= "control_bind_host = \"127.0.0.1\"\n";
+        $OUT .= "control_bind_port = \"$cport\"\n";
+    } else {
+        $OUT .= "control_unix_path = \"".$record->key. ".sock\"\n";
+    }
     my $encryption = $record->prop('Encryption') || 'enabled';
     if ($encryption eq 'enabled') {
         $OUT .= "cleartext_data = 0\n";

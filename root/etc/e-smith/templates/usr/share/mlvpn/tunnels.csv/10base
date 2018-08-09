@@ -1,0 +1,10 @@
+{
+    use esmith::ConfigDB;
+    my $db = esmith::ConfigDB->open_ro('mlvpn');
+    foreach ($db->get_all()) {
+        my $status = $_->prop('status') || 'disabled';
+        next if ($status eq 'disabled');
+        my $port = $_->prop('ControlPort') || next;
+        $OUT .= $_->key.",$port\n";
+    }
+}
