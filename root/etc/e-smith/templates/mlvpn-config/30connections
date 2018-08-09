@@ -6,7 +6,6 @@
     use esmith::NetworksDB;
     my $ndb = esmith::NetworksDB->open_ro() || die("Can't open networks db");
     my $connections = $record->prop('Connections') || die("No connection given");
-    my $timeout = $record->prop('Timeout') || 30;
     my $type = $record->prop('type');
    
     sub _get_provider_name {
@@ -43,7 +42,6 @@
             $OUT .= "bindport = $port\n";
         }
 
-        $OUT .= "timeout = $timeout\n";
         if ( $upload ne '') {
             $OUT .= "bandwidth_upload = $upload\n";
         }
