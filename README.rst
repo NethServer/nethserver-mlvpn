@@ -191,6 +191,13 @@ Restarting a tunnel: ::
 
 Logs are saved inside ``/var/log/mlvpn``.
 
+
+Graphs
+======
+
+If ``ControlPort`` is set, a graph of tunnel usage is available at ``http://<server>/mlvpn``.
+The site is accessible by everyone but the access can be restricted by editing ``/etc/http/conf.d/mlvpn`` file and then reloding the http server.
+
 Limitations
 ===========
 
