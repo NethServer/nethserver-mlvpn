@@ -2,7 +2,7 @@
 nethserver-mlvpn
 =================
 
-Implement a simple SD-WAN for NethServer using MLVPN (Multi-link VPN).
+Implement a simple SD-WAN for NethServer using MLVPN (Multi-Link VPN).
 
 Features:
 
@@ -23,7 +23,7 @@ Current implementation covers two different usage scenarios:
 Fault tolerant tunnels
 ----------------------
 
-Connect with a tunnel two different networks where NethServer is the gateway of both networks.
+Connect two separate networks where NethServer is the gateway of both networks.
 The tunnel will aggregate the bandwidth of multiple red interfaces, also handling failover scenarios.
 
 For instance, an office with 2 ADSL connections should always able to access a remote Nextcloud instance with
@@ -40,28 +40,28 @@ High-speed proxy firewall
 Use a remote high-bandwidth VPS as gateway for all Internet traffic.
 
 For instance, an office has two slow Internet connections and wants to maximize
-the available bandwidth also exposing services like a local mail server.
+the available bandwidth (optionally exposing services like a local mail server).
 
 Requirements:
 
 - one NethServer installation hosted on a high-bandwidth VPS: 1 green network interface
 - one NethServer installation configured with 2 WAN connections: 1 (or more) green network interface, 2 red network interfaces
 
-All connections to the outside world will use the public IP of the VPS.
+All connections to the Internet will use the public IP of the VPS.
 
 Configuration
 =============
 
-Tunnel are records inside the ``mlvpn`` esmith database. Each machine can handle multiple tunnels.
+Tunnels are records inside the ``mlvpn`` esmith database. Each system can handle multiple tunnels.
 
-Supported record type:
+Supported record types:
 
-* ``server``: configure a MLVPN server on a VPS or another remote machine with 1 at least one green interface
-* ``client``: configure a MLVPN client on firewall with at least 2 WAN connections to be bonded together
+* ``server``: configure a MLVPN server on a VPS or another remote machine with at least one green interface
+* ``client``: configure a MLVPN client on a firewall with at least 2 WAN connections to be bonded together
 
 Options:
 
-* ``status``: can be ``enabled`` or ``disabled``, if ``disabled`` the MLVPN instance will not be 
+* ``status``: can be ``enabled`` or ``disabled``, if ``disabled`` the MLVPN instance will not be started
 
 * ``Connections``: a comma-separated list of strings in the format ``identifier:address:port``. 
   The meaning is different when used on a client or server record.
@@ -69,18 +69,18 @@ Options:
   * server: ``identifier`` is a unique name of the connection, like "fiber1"; ``address`` is the bind IP, it should always be ``0.0.0.0``; ``port`` is the unique binding port
   * client: ``identifier`` is the name of an existing red interface, like ``eth2``; ``address`` is the remote server public IP or hostname; ``port`` is the server remote port
 
-* ``ControlPort``: HTTP port to use for retrieving tunnel statics. The port is bind only on 127.0.0.1. Use progressive ports starting from ``50001``
+* ``ControlPort``: HTTP port to use for retrieving tunnel statistics. The port is bound only to 127.0.0.1. Use consecutive  port numbers starting from ``50001``
 
 * ``Encryption``: if ``enabled`` all traffic will be encrypted, if ``disabled`` session data (auth)
-  will still be encrypted, but all data packets will not
+  will still be encrypted, but all data packets will be not
 
 * ``LocalPeer``: a local virtual IP for the tunnel, used for firewall rules
 
-* ``LossTolerence``: the maximum loss ratio accepted before the link affected is being considered too lossy and removed from aggregation.
-  This value is expressed in percent. A value of ``100`` disables the loss tolerance system
+* ``LossTolerence``: the maximum packet loss ratio accepted before the link affected is being considered too lossy and removed from aggregation.
+  This value is expressed as a percentage. A value of ``100`` disables the loss tolerance system
 
-* ``Nat``: set it to ``enabled`` if the tunnel should be used for internet access. Inside the the client use the tunnel as default gateway; inside the server, it enabled the masquerading.
-  Set to ``disabled`` if the tunnel should be used to access services running on the server (or on a network attached to it)
+* ``Nat``: set it to ``enabled`` if the tunnel should be used for internet access. On the client use the tunnel as default gateway; on the server it enables IP masquerading.
+  Set to ``disabled`` if the tunnel should be used to access services running on the server itself or a local network
 
 * ``Password``: random password used for encryption
 
@@ -88,16 +88,16 @@ Options:
 
 * ``RemotePeer``: the IP of the remote tunnel endpoint, used for firewall rules
 
-* ``ReorderBuffer``: number of packets inside the buffer for reordering algorithm. Experiment to know what value is best for you. Good starting point can be as small as ``64`` packets
+* ``ReorderBuffer``: number of packets inside the buffer for reordering algorithm. Experiment to know what value is best for you. A good starting point can be as small as ``64`` packets
   If set to ``0``, it disables the link aggregation
 
-* ``Timeout``: triggered when the other side does not responds to keepalive packets. Keepalive are send every timeout/2 seconds. Good starting point can be ``30`` seconds
+* ``Timeout``: triggered when the other side does not responds to keepalive packets. Keepalives are sent every timeout/2 seconds. A good starting point can be ``30`` seconds
 
 
-When configuring a client and a server, the following options should be the same on both ends: ``Encryption``, ``LossTolerance``, ``Nat``, ``Password``, ``ReorderBuffer``, ``Timeout``.
+When configuring a client and a server, the following options should have identical values on both ends: ``Encryption``, ``LossTolerance``, ``Nat``, ``Password``, ``ReorderBuffer``, ``Timeout``.
 Swap ``LocalPeer`` and ``RemotePeer`` IPs  between server and client configuration.
 
-Please use a short names for server and client, do not pick a name longer 5 characters.
+Please use a short name for server and client, do not pick a name longer than 5 characters.
 
 Events
 ------
@@ -110,11 +110,11 @@ There are 2 events defined:
 Firewall
 ========
 
-Tunnels are confined inside a ``mlvnpn`` Shorewall zones which can be considered as a trusted network:
+Tunnels are confined inside a ``mlvnpn`` Shorewall zone which can be considered as a trusted network:
 by default, all traffic is permitted to and from the mlvpn zone.
 As an exception, when a server is acting as a gateway, the mlvpn interface is marked as green interface allowing the 
 creation of firewall rules directly from the web interface.
-Each tunnel creates a TUN device named ``mlvpn<name``. For instance if the client is named ``c1``, the interfaces will be named ``mlvpnc1``.
+Each tunnel creates a TUN device named ``mlvpn<name>``. For instance if the client is named ``c1``, the interfaces will be named ``mlvpnc1``.
 
 It's possible to create port forwarding rules inside the server for services running on the client or on a host behind the client itself.
 
@@ -153,10 +153,9 @@ Configure a server named: ``s1``::
   signal-event mlvpn-modify s1
     
 High-speed proxy firewall
-
 -------------------------
 
-Access Internet using the VPS a proxy firewall.
+Access Internet using the VPS as a proxy firewall.
 
 Configure a client named ``c1``: ::
 
@@ -172,7 +171,8 @@ Configure a server named: ``s1``::
   signal-event mlvpn-modify s1
 
 
-Check the used public IP is the one on the VPS: ::
+A useful service to check that the clients are reaching the Internet through the VPS 
+(it should return the IP address of the VPS): ::
 
   curl ifconfig.co
 
@@ -183,7 +183,7 @@ Check the status: ::
 
   systemctl status mlvpn@<name>
 
-Where name is tunnel name, for instance ``c1``: ``systemctl status mlvpn@c1``.
+Where <name> is tunnel name, for instance ``c1``: ``systemctl status mlvpn@c1``.
 
 Restarting a tunnel: ::
 
