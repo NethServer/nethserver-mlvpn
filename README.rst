@@ -142,7 +142,7 @@ Create a tunnel between an office firewall and a VPS to access a service running
 Configure a client named ``c1``: ::
 
   db mlvpn set c1 client status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 50 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
-  RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat disabled ControlPort 50001
+  RemoteNetworks 192.168.100.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat disabled ControlPort 50001
   signal-event mlvpn modify c1
 
 
