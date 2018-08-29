@@ -27,10 +27,11 @@
  
     foreach (split(',',$connections)) {
         my ($interface, $host, $port) = split(':', $_);
+        my $upload = '';
 
         if ($type eq 'client') {
             my $i = $ndb->get($interface) || next;
-            my $upload = $i->prop('FwOutBandwidth') || '';
+            $upload = $i->prop('FwOutBandwidth') || '';
             $OUT .= "\n["._get_provider_name($i->key)."]\n";
             my $ipaddr = $i->prop('ipaddr') || _get_ipaddr($interface) || next;
             $OUT .= "bindhost = $ipaddr\n";
