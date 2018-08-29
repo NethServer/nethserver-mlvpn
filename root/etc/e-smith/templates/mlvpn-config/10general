@@ -5,7 +5,6 @@
 [general]
 statuscommand = "/etc/mlvpn/mlvpn_updown_shorewall.sh"
 mode = "{{$record->prop('type')}}"
-mtu = 1444
 tuntap = "tun"
 interface_name = "{{"mlvpn" . $record->key}}"
 timeout = {{$record->prop('Timeout')}}
