@@ -9,9 +9,16 @@ tuntap = "tun"
 interface_name = "{{"mlvpn" . $record->key}}"
 timeout = {{$record->prop('Timeout')}}
 password = "{{$record->prop("Password")}}"
-reorder_buffer_size = {{$record->prop('ReorderBuffer')}}
 loss_tolerence = {{$record->prop('LossTolerence')}}
 {
+
+    my $reorder_buffer = $record->prop('ReorderBuffer') || 'enabled';
+    if ($reorder_buffer eq 'enabled') {
+        $OUT .= "reorder_buffer = yes\n";
+    } else {
+        $OUT .= "reorder_buffer = no\n";
+    }
+
     my $cport = $record->prop('ControlPort') || '';
     if ($cport ne '') {
         $OUT .= "control_bind_host = \"127.0.0.1\"\n";

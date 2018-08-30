@@ -88,8 +88,7 @@ Options:
 
 * ``RemotePeer``: the IP of the remote tunnel endpoint, used for firewall rules
 
-* ``ReorderBuffer``: number of packets inside the buffer for reordering algorithm. Experiment to know what value is best for you. A good starting point can be as small as ``64`` packets
-  If set to ``0``, it disables the link aggregation
+* ``ReorderBuffer``: if ``enabled`` (default) packets will be spread between links to aggregate bandwidth. If ``disabled`` maximum bandwidth and latency will be close to that of the slowest link.
 
 * ``Timeout``: triggered when the other side does not responds to keepalive packets. Keepalives are sent every timeout/2 seconds. A good starting point can be ``30`` seconds
 
@@ -141,14 +140,14 @@ Create a tunnel between an office firewall and a VPS to access a service running
 
 Configure a client named ``c1``: ::
 
-  db mlvpn set c1 client status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 50 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
+  db mlvpn set c1 client status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer enabled LossTolerence 50 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
   RemoteNetworks 192.168.100.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat disabled ControlPort 50001
   signal-event mlvpn modify c1
 
 
 Configure a server named: ``s1``::
 
-  db mlvpn set s1 server status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 50 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
+  db mlvpn set s1 server status enabled Password mypassword Timeout 30 Encryption enabled ReorderBuffer enabled LossTolerence 50 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
   RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat disabled ControlPort 50001
   signal-event mlvpn-modify s1
     
@@ -159,14 +158,14 @@ Access Internet using the VPS as a proxy firewall.
 
 Configure a client named ``c1``: ::
 
-  db mlvpn set c1 client status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 100 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
+  db mlvpn set c1 client status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer enabled LossTolerence 100 Connections eth1:1.2.3.4:5080,eth2:1.2.3.4:5081 \
   RemoteNetworks 192.168.1000.0/24 LocalPeer 10.42.43.2 RemotePeer 10.42.43.1 Nat enabled ControlPort 50001
   signal-event mlvpn modify c1
 
 
 Configure a server named: ``s1``::
 
-  db mlvpn set s1 server status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer 64 LossTolerence 100 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
+  db mlvpn set s1 server status enabled Password pippo Timeout 30 Encryption enabled ReorderBuffer enabled LossTolerence 100 Connections adsl1:0.0.0.0:5080,adsl2:0.0.0.0:5081 \
   RemoteNetworks 192.168.0.0/24 LocalPeer 10.42.43.1 RemotePeer 10.42.43.2 Nat enabled ControlPort 50001
   signal-event mlvpn-modify s1
 
